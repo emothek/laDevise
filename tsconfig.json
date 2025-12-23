@@ -4,7 +4,8 @@
     "strict": true,
     "paths": {
       "@/*": [
-        "./*"
+        "./*",
+        "./src/*"
       ]
     }
   },
@@ -13,5 +14,12 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "supabase/**/*"
   ]
 }

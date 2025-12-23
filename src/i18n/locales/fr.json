@@ -1,0 +1,87 @@
+{
+    "common": {
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "confirm": "Confirmer",
+        "close": "Fermer"
+    },
+    "tabs": {
+        "rates": "Taux de Change",
+        "calculator": "Calculatrice",
+        "metals": "Or & Argent",
+        "wallet": "Portefeuille"
+    },
+    "rates": {
+        "title": "Taux de Change",
+        "official": "Officiel",
+        "parallel": "Marché Parallèle",
+        "buy": "Achat",
+        "sell": "Vente",
+        "lastUpdate": "Dernière mise à jour",
+        "noData": "Aucun taux disponible"
+    },
+    "calculator": {
+        "title": "Calculatrice de Devises",
+        "from": "De",
+        "to": "À",
+        "amount": "Montant",
+        "result": "Résultat",
+        "history": "Historique des Calculs",
+        "clearHistory": "Effacer l'Historique",
+        "noHistory": "Aucun historique de calcul"
+    },
+    "metals": {
+        "title": "Prix de l'Or & Argent",
+        "gold": "Or",
+        "silver": "Argent",
+        "perGram": "par gramme",
+        "perOunce": "par once"
+    },
+    "wallet": {
+        "title": "Mon Portefeuille",
+        "totalWealth": "Estimation Totale de la Richesse",
+        "parallelMarket": "Marché Parallèle",
+        "officialBank": "Banque Officielle",
+        "myAssets": "Mes Actifs",
+        "addAsset": "Ajouter un Actif",
+        "noAssets": "Aucun actif ajouté.",
+        "label": "Libellé (ex. Espèces, Wise, Banque)",
+        "currency": "Devise",
+        "amount": "Montant",
+        "deleteAsset": "Supprimer l'Actif",
+        "deleteConfirm": "Êtes-vous sûr?",
+        "signInPrompt": "Connectez-vous pour suivre vos espèces et actifs bancaires dans plusieurs devises en toute sécurité dans le cloud.",
+        "signInButton": "Se Connecter / Créer un Compte"
+    },
+    "auth": {
+        "welcomeBack": "Bon Retour",
+        "signInPrompt": "Connectez-vous pour enregistrer l'historique et suivre vos actifs.",
+        "email": "Email",
+        "password": "Mot de passe",
+        "forgotPassword": "Mot de passe oublié?",
+        "signIn": "Se Connecter",
+        "signUp": "S'Inscrire",
+        "signOut": "Se Déconnecter",
+        "continueWith": "Continuer avec {{provider}}",
+        "or": "OU",
+        "loggedIn": "Vous êtes connecté",
+        "verificationSent": "Vérification Envoyée",
+        "checkEmail": "Veuillez vérifier votre boîte de réception (et spam) pour l'email de vérification.",
+        "resetEmail": "Les instructions de réinitialisation du mot de passe ont été envoyées à votre email.",
+        "authError": "Erreur d'Authentification",
+        "sessionError": "Erreur de Session",
+        "noTokens": "Échec de l'authentification - aucun jeton reçu",
+        "enterEmail": "Veuillez d'abord entrer votre adresse email pour réinitialiser votre mot de passe.",
+        "enterBoth": "Veuillez entrer l'email et le mot de passe.",
+        "completingSignIn": "Finalisation de la connexion..."
+    },
+    "language": {
+        "select": "Langue",
+        "en": "English",
+        "fr": "Français",
+        "ar": "العربية"
+    }
+}

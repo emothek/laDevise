@@ -1,0 +1,87 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "close": "Close"
+    },
+    "tabs": {
+        "rates": "Exchange Rates",
+        "calculator": "Calculator",
+        "metals": "Gold & Silver",
+        "wallet": "Wallet"
+    },
+    "rates": {
+        "title": "Exchange Rates",
+        "official": "Official",
+        "parallel": "Parallel Market",
+        "buy": "Buy",
+        "sell": "Sell",
+        "lastUpdate": "Last update",
+        "noData": "No rates available"
+    },
+    "calculator": {
+        "title": "Currency Calculator",
+        "from": "From",
+        "to": "To",
+        "amount": "Amount",
+        "result": "Result",
+        "history": "Calculation History",
+        "clearHistory": "Clear History",
+        "noHistory": "No calculation history"
+    },
+    "metals": {
+        "title": "Gold & Silver Prices",
+        "gold": "Gold",
+        "silver": "Silver",
+        "perGram": "per gram",
+        "perOunce": "per ounce"
+    },
+    "wallet": {
+        "title": "My Wallet",
+        "totalWealth": "Total Wealth Estimate",
+        "parallelMarket": "Parallel Market",
+        "officialBank": "Official Bank",
+        "myAssets": "My Assets",
+        "addAsset": "Add New Asset",
+        "noAssets": "No assets added yet.",
+        "label": "Label (e.g. Cash, Wise, Bank)",
+        "currency": "Currency",
+        "amount": "Amount",
+        "deleteAsset": "Delete Asset",
+        "deleteConfirm": "Are you sure?",
+        "signInPrompt": "Sign in to track your cash and bank assets across multiple currencies securely in the cloud.",
+        "signInButton": "Sign In / Create Account"
+    },
+    "auth": {
+        "welcomeBack": "Welcome Back",
+        "signInPrompt": "Sign in to save history and track your assets.",
+        "email": "Email",
+        "password": "Password",
+        "forgotPassword": "Forgot Password?",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out",
+        "continueWith": "Continue with {{provider}}",
+        "or": "OR",
+        "loggedIn": "You are logged in",
+        "verificationSent": "Verification Sent",
+        "checkEmail": "Please check your inbox (and spam) for the verification email.",
+        "resetEmail": "Password reset instructions have been sent to your email.",
+        "authError": "Authentication Error",
+        "sessionError": "Session Error",
+        "noTokens": "Authentication failed - no tokens received",
+        "enterEmail": "Please enter your email address first to reset your password.",
+        "enterBoth": "Please enter both email and password.",
+        "completingSignIn": "Completing sign in..."
+    },
+    "language": {
+        "select": "Language",
+        "en": "English",
+        "fr": "Français",
+        "ar": "العربية"
+    }
+}

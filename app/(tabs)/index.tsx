@@ -1,14 +1,242 @@
-import { StyleSheet } from 'react-native';
-
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useColorScheme } from '@/components/useColorScheme';
+import Colors from '@/constants/Colors';
+import { supabase } from '@/lib/supabase';
+import { ExchangeRate, fetchRates } from '@/services/rates';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FlatList, RefreshControl, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 
-export default function TabOneScreen() {
+const FLAG_MAP: Record<string, string> = {
+  EUR: '🇪🇺',
+  USD: '🇺🇸',
+  CAD: '🇨🇦',
+  GBP: '🇬🇧',
+  CHF: '🇨🇭',
+  CNY: '🇨🇳',
+  TRY: '🇹🇷',
+  SAR: '🇸🇦',
+  AED: '🇦🇪',
+  TND: '🇹🇳',
+  MAD: '🇲🇦',
+  JPY: '🇯🇵',
+};
+
+const PRIORITY_CURRENCIES = ['EUR', 'USD', 'CNY', 'CAD', 'CHF'];
+
+interface GroupedRate {
+  currency: string;
+  official?: ExchangeRate;
+  black_market?: ExchangeRate;
+}
+
+const RateCard = ({ item, isFavorite, onToggleFavorite, onPress }: { item: GroupedRate, isFavorite: boolean, onToggleFavorite: () => void, onPress: () => void }) => {
+  const { t } = useTranslation();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+      <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
+        <View style={styles.cardHeader}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.currencyIcon}>{FLAG_MAP[item.currency] || '🏳️'}</Text>
+            <Text style={styles.currencyCode}>{item.currency}</Text>
+          </View>
+          <TouchableOpacity onPress={onToggleFavorite} style={styles.heartButton}>
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={24}
+              color={isFavorite ? "#e74c3c" : Colors[colorScheme ?? 'light'].text}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.ratesContainer}>
+          {/* Official Side */}
+          <View style={styles.rateSide}>
+            <Text style={styles.sideTitle}>{t('rates.official')}</Text>
+            {item.official ? (
+              <View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>{t('rates.buy')}:</Text>
+                  <Text style={styles.priceValue}>{item.official.buy_price.toFixed(2)}</Text>
+                </View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>{t('rates.sell')}:</Text>
+                  <Text style={styles.priceValue}>{item.official.sell_price.toFixed(2)}</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={styles.naText}>N/A</Text>
+            )}
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Parallel Side */}
+          <View style={styles.rateSide}>
+            <Text style={styles.sideTitle}>{t('rates.parallel')}</Text>
+            {item.black_market ? (
+              <View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>Buy:</Text>
+                  <Text style={styles.priceValue}>{item.black_market.buy_price.toFixed(2)}</Text>
+                </View>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>Sell:</Text>
+                  <Text style={styles.priceValue}>{item.black_market.sell_price.toFixed(2)}</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={styles.naText}>N/A</Text>
+            )}
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+export default function RatesScreen() {
+  const { data, isLoading, refetch } = useQuery<ExchangeRate[]>({
+    queryKey: ['rates'],
+    queryFn: fetchRates,
+  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  useEffect(() => {
+    loadFavorites();
+  }, []);
+
+  const loadFavorites = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('favorite_currencies');
+      if (stored) {
+        setFavorites(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Failed to load favorites", e);
+    }
+  };
+
+  const toggleFavorite = async (currency: string) => {
+    const newFavorites = favorites.includes(currency)
+      ? favorites.filter(c => c !== currency)
+      : [...favorites, currency];
+
+    setFavorites(newFavorites);
+    await AsyncStorage.setItem('favorite_currencies', JSON.stringify(newFavorites));
+
+    // Sync with Supabase
+    try {
+      const token = await AsyncStorage.getItem('push_token');
+      if (token) {
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from('push_subscriptions').upsert({
+          token,
+          user_id: user?.id ?? null,
+          favorite_currencies: newFavorites,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'token' });
+      }
+    } catch (err) {
+      console.error("Failed to sync favorites to server", err);
+    }
+  };
+
+
+  const groupedData = useMemo(() => {
+    if (!data) return [];
+
+    const groups: Record<string, GroupedRate> = {};
+
+    data.forEach(rate => {
+      if (!groups[rate.currency]) {
+        groups[rate.currency] = { currency: rate.currency };
+      }
+      if (rate.type === 'OFFICIAL') {
+        groups[rate.currency].official = rate;
+      } else {
+        groups[rate.currency].black_market = rate;
+      }
+    });
+
+    let result = Object.values(groups);
+
+    // Filter by search
+    if (searchQuery) {
+      result = result.filter(g => g.currency.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
+
+    // Sort: Favorites first, then Priority list, then others
+    result.sort((a, b) => {
+      const aFav = favorites.includes(a.currency);
+      const bFav = favorites.includes(b.currency);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+
+      const aPriority = PRIORITY_CURRENCIES.indexOf(a.currency);
+      const bPriority = PRIORITY_CURRENCIES.indexOf(b.currency);
+
+      // If both in priority list
+      if (aPriority !== -1 && bPriority !== -1) return aPriority - aPriority; // Wait, actually standard sort is enough
+      if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
+
+      if (aPriority !== -1) return -1;
+      if (bPriority !== -1) return 1;
+
+      return a.currency.localeCompare(b.currency);
+    });
+
+    return result;
+
+  }, [data, searchQuery, favorites]);
+
+  const renderItem = ({ item }: { item: GroupedRate }) => (
+    <RateCard
+      item={item}
+      isFavorite={favorites.includes(item.currency)}
+      onToggleFavorite={() => toggleFavorite(item.currency)}
+      onPress={() => router.push(`/details/${item.currency}`)}
+    />
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color={Colors[colorScheme ?? 'light'].text} style={styles.searchIcon} />
+        <TextInput
+          style={[styles.searchInput, { color: Colors[colorScheme ?? 'light'].text }]}
+          placeholder="Search currency..."
+          placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <Text>Loading rates...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={groupedData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.currency}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={Colors[colorScheme ?? 'light'].text} />
+          }
+        />
+      )}
     </View>
   );
 }
@@ -16,16 +244,113 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  searchContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    margin: 16,
+    paddingHorizontal: 12,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(150,150,150, 0.1)',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-  title: {
+  listContent: {
+    padding: 16,
+    paddingTop: 0,
+    paddingBottom: 40,
+  },
+  card: {
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardLight: {
+    backgroundColor: '#ffffff',
+  },
+  cardDark: {
+    backgroundColor: '#1c1c1e',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(150,150,150, 0.1)',
+    paddingBottom: 10,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heartButton: {
+    padding: 4,
+  },
+  currencyIcon: {
+    fontSize: 28,
+    marginRight: 10,
+  },
+  currencyCode: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  ratesContainer: {
+    flexDirection: 'row',
   },
+  rateSide: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  divider: {
+    width: 1,
+    backgroundColor: 'rgba(150,150,150, 0.2)',
+    marginHorizontal: 10,
+  },
+  sideTitle: {
+    fontSize: 12,
+    marginBottom: 8,
+    fontWeight: '600',
+    opacity: 0.6,
+    textTransform: 'uppercase',
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    minWidth: 80,
+    marginBottom: 4,
+  },
+  priceLabel: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginRight: 8,
+  },
+  priceValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  naText: {
+    opacity: 0.3,
+    fontStyle: 'italic',
+  }
 });
