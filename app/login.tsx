@@ -269,13 +269,13 @@ export default function LoginScreen() {
                         <Text style={styles.socialButtonText}>Continue with Google</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={[styles.socialButton, { backgroundColor: '#4267B2' }]} // FB Blue
                         onPress={() => signInWithProvider('facebook')}
                     >
                         <FontAwesome name="facebook" size={20} color="white" style={styles.socialIcon} />
                         <Text style={styles.socialButtonText}>Continue with Facebook</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </ScrollView>
         </View>

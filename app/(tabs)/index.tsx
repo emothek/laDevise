@@ -72,7 +72,7 @@ const RateCard = ({ item, isFavorite, onToggleFavorite, onPress }: { item: Group
                 </View>
               </View>
             ) : (
-              <Text style={styles.naText}>N/A</Text>
+              <Text style={styles.naText}>{t('common.na')}</Text>
             )}
           </View>
 
@@ -84,16 +84,16 @@ const RateCard = ({ item, isFavorite, onToggleFavorite, onPress }: { item: Group
             {item.black_market ? (
               <View>
                 <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>Buy:</Text>
+                  <Text style={styles.priceLabel}>{t('rates.buy')}:</Text>
                   <Text style={styles.priceValue}>{item.black_market.buy_price.toFixed(2)}</Text>
                 </View>
                 <View style={styles.priceRow}>
-                  <Text style={styles.priceLabel}>Sell:</Text>
+                  <Text style={styles.priceLabel}>{t('rates.sell')}:</Text>
                   <Text style={styles.priceValue}>{item.black_market.sell_price.toFixed(2)}</Text>
                 </View>
               </View>
             ) : (
-              <Text style={styles.naText}>N/A</Text>
+              <Text style={styles.naText}>{t('common.na')}</Text>
             )}
           </View>
         </View>
@@ -103,6 +103,7 @@ const RateCard = ({ item, isFavorite, onToggleFavorite, onPress }: { item: Group
 };
 
 export default function RatesScreen() {
+  const { t } = useTranslation();
   const { data, isLoading, refetch } = useQuery<ExchangeRate[]>({
     queryKey: ['rates'],
     queryFn: fetchRates,
@@ -215,7 +216,7 @@ export default function RatesScreen() {
         <Ionicons name="search" size={20} color={Colors[colorScheme ?? 'light'].text} style={styles.searchIcon} />
         <TextInput
           style={[styles.searchInput, { color: Colors[colorScheme ?? 'light'].text }]}
-          placeholder="Search currency..."
+          placeholder={t('common.searchPlaceholder')}
           placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -224,7 +225,7 @@ export default function RatesScreen() {
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <Text>Loading rates...</Text>
+          <Text>{t('rates.loading')}</Text>
         </View>
       ) : (
         <FlatList

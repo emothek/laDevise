@@ -129,6 +129,103 @@ export interface Database {
           updated_at?: string
           created_at?: string
         }
+      },
+      market_offers: {
+        Row: {
+          id: string
+          user_id: string
+          type: 'OFFER' | 'REQUEST'
+          currency_from: string
+          currency_to: string
+          amount: number
+          min_amount: number | null
+          rate: number | null
+          payment_methods: string[]
+          wilaya: string | null
+          commune: string | null
+          expires_at: string | null
+          status: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'DELETED'
+          contact_info_hidden: boolean | null
+          contact_preference: string | null
+          phone_number: string | null
+          settled_request_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: 'OFFER' | 'REQUEST'
+          currency_from: string
+          currency_to?: string
+          amount: number
+          min_amount?: number | null
+          rate?: number | null
+          payment_methods: string[]
+          wilaya?: string | null
+          commune?: string | null
+          expires_at?: string | null
+          status?: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'DELETED'
+          contact_info_hidden?: boolean | null
+          contact_preference?: string | null
+          phone_number?: string | null
+          settled_request_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: 'OFFER' | 'REQUEST'
+          currency_from?: string
+          currency_to?: string
+          amount?: number
+          min_amount?: number | null
+          rate?: number | null
+          payment_methods?: string[]
+          wilaya?: string | null
+          commune?: string | null
+          expires_at?: string | null
+          status?: 'ACTIVE' | 'COMPLETED' | 'EXPIRED' | 'DELETED'
+          contact_info_hidden?: boolean | null
+          contact_preference?: string | null
+          phone_number?: string | null
+          settled_request_id?: string | null
+          created_at?: string
+        }
+      },
+      market_requests: {
+        Row: {
+          id: string
+          offer_id: string
+          requester_id: string
+          status: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+          proposed_rate: number
+          proposed_amount: number
+          proposed_location: string | null
+          payment_method: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          offer_id: string
+          requester_id: string
+          status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+          proposed_rate: number
+          proposed_amount: number
+          proposed_location?: string | null
+          payment_method?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          offer_id?: string
+          requester_id?: string
+          status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+          proposed_rate?: number
+          proposed_amount?: number
+          proposed_location?: string | null
+          payment_method?: string | null
+          created_at?: string
+        }
       }
     }
   }

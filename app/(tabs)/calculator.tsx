@@ -61,7 +61,7 @@ export default function CalculatorScreen() {
 
         {/* Converter Card */}
         <View style={[styles.card, isDark ? styles.cardDark : styles.cardLight]}>
-          <Text style={styles.cardTitle}>Converter</Text>
+          <Text style={styles.cardTitle}>{t('calculator.converterTitle')}</Text>
 
           <View style={styles.segmentContainer}>
             {(['BLACK_MARKET', 'OFFICIAL'] as const).map((type) => (
@@ -77,7 +77,7 @@ export default function CalculatorScreen() {
                   styles.segmentText,
                   rateType === type && { color: 'white', fontWeight: 'bold' }
                 ]}>
-                  {type === 'BLACK_MARKET' ? 'Square' : 'Official'}
+                  {type === 'BLACK_MARKET' ? t('calculator.square') : t('calculator.official')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -114,13 +114,13 @@ export default function CalculatorScreen() {
           </View>
 
           <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.tint }]} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save Calculation</Text>
+            <Text style={styles.saveButtonText}>{t('calculator.saveCalculation')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Currency Selector */}
         <View style={styles.currencyList}>
-          <Text style={styles.sectionHeader}>Select Currency</Text>
+          <Text style={styles.sectionHeader}>{t('calculator.selectCurrency')}</Text>
           <View style={styles.flexRow}>
             {['EUR', 'USD', 'CAD', 'GBP', 'CHF'].map(curr => (
               <TouchableOpacity
@@ -143,9 +143,9 @@ export default function CalculatorScreen() {
         {/* Info Card */}
         {activeRate && (
           <View style={[styles.infoCard, { borderColor: theme.tabIconDefault }]}>
-            <Text style={styles.infoText}>Current Rate (1 {selectedCurrency})</Text>
+            <Text style={styles.infoText}>{t('calculator.currentRate', { currency: selectedCurrency })}</Text>
             <Text style={styles.infoRate}>
-              Buy: {activeRate.buy_price.toFixed(2)} | Sell: {activeRate.sell_price.toFixed(2)}
+              {t('calculator.buySellRate', { buy: activeRate.buy_price.toFixed(2), sell: activeRate.sell_price.toFixed(2) })}
             </Text>
           </View>
         )}
@@ -154,9 +154,9 @@ export default function CalculatorScreen() {
         {history.length > 0 && (
           <View style={styles.historySection}>
             <View style={styles.historyHeader}>
-              <Text style={styles.sectionHeader}>History</Text>
+              <Text style={styles.sectionHeader}>{t('calculator.history')}</Text>
               <TouchableOpacity onPress={clearHistory}>
-                <Text style={{ color: 'red', fontSize: 12 }}>Clear</Text>
+                <Text style={{ color: 'red', fontSize: 12 }}>{t('common.clear')}</Text>
               </TouchableOpacity>
             </View>
             {history.map((item) => (
@@ -166,7 +166,7 @@ export default function CalculatorScreen() {
                     {item.amount} {item.fromCurrency} ➔ {item.result.toFixed(2)} {item.toCurrency}
                   </Text>
                   <Text style={[styles.historySubText, { color: theme.text }]}>
-                    {new Date(item.date).toLocaleDateString()} • {item.type === 'BLACK_MARKET' ? 'Square' : 'Official'}
+                    {new Date(item.date).toLocaleDateString()} • {item.type === 'BLACK_MARKET' ? t('calculator.square') : t('calculator.official')}
                   </Text>
                 </View>
                 <Text style={[styles.historyRate, { color: theme.text }]}>@ {item.rate}</Text>

@@ -171,24 +171,24 @@ export default function WalletScreen() {
 
                 {/* Summary Card */}
                 <View style={[styles.card, { backgroundColor: '#2f95dc' }]}>
-                    <Text style={styles.cardTitle}>Total Wealth Estimate</Text>
+                    <Text style={styles.cardTitle}>{t('wallet.totalWealth')}</Text>
 
                     <View style={[styles.totalRow, { backgroundColor: 'transparent' }]}>
-                        <Text style={styles.totalLabel}>Parallel Market</Text>
+                        <Text style={styles.totalLabel}>{t('wallet.parallelMarket')}</Text>
                         <Text style={styles.totalValue}>{totals.parallel.toLocaleString(undefined, { maximumFractionDigits: 0 })} DZD</Text>
                     </View>
 
                     <View style={styles.divider} />
 
                     <View style={[styles.totalRow, { backgroundColor: 'transparent' }]}>
-                        <Text style={styles.totalLabel}>Official Bank</Text>
+                        <Text style={styles.totalLabel}>{t('wallet.officialBank')}</Text>
                         <Text style={styles.totalValue}>{totals.official.toLocaleString(undefined, { maximumFractionDigits: 0 })} DZD</Text>
                     </View>
                 </View>
 
                 {/* Assets List */}
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>My Assets</Text>
+                    <Text style={styles.sectionTitle}>{t('wallet.myAssets')}</Text>
                     <TouchableOpacity onPress={() => setIsAdding(true)}>
                         <Ionicons name="add-circle" size={32} color={Colors[colorScheme ?? 'light'].tint} />
                     </TouchableOpacity>
@@ -200,15 +200,15 @@ export default function WalletScreen() {
                     assets.map((asset) => (
                         <View key={asset.id} style={[styles.assetItem, { borderBottomColor: Colors[colorScheme ?? 'light'].tabIconDefault }]}>
                             <View style={styles.assetInfo}>
-                                <Text style={styles.assetLabel}>{asset.label || 'Wallet'}</Text>
+                                <Text style={styles.assetLabel}>{asset.label || t('wallet.defaultLabel')}</Text>
                                 <Text style={styles.assetCurrency}>{asset.currency}</Text>
                             </View>
                             <View style={styles.assetRight}>
                                 <Text style={styles.assetAmount}>{asset.amount.toLocaleString()}</Text>
                                 <TouchableOpacity onPress={() =>
-                                    Alert.alert("Delete Asset", "Are you sure?", [
-                                        { text: "Cancel", style: "cancel" },
-                                        { text: "Delete", style: "destructive", onPress: () => deleteAssetMutation.mutate(asset.id) }
+                                    Alert.alert(t('wallet.deleteAsset'), t('wallet.confirmDelete'), [
+                                        { text: t('common.cancel'), style: "cancel" },
+                                        { text: t('common.delete'), style: "destructive", onPress: () => deleteAssetMutation.mutate(asset.id) }
                                     ])
                                 }>
                                     <Ionicons name="trash-outline" size={20} color="#e74c3c" style={{ marginLeft: 10 }} />
@@ -217,7 +217,7 @@ export default function WalletScreen() {
                         </View>
                     ))
                 ) : (
-                    <Text style={{ textAlign: 'center', opacity: 0.5, marginTop: 20 }}>No assets added yet.</Text>
+                    <Text style={{ textAlign: 'center', opacity: 0.5, marginTop: 20 }}>{t('wallet.noAssets')}</Text>
                 )}
 
             </ScrollView>
@@ -226,18 +226,18 @@ export default function WalletScreen() {
             <Modal visible={isAdding} animationType="slide" transparent>
                 <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContainer}>
                     <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme ?? 'light'].background }]}>
-                        <Text style={styles.modalTitle}>Add New Asset</Text>
+                        <Text style={styles.modalTitle}>{t('wallet.addAssetTitle')}</Text>
 
-                        <Text style={styles.inputLabel}>Label (e.g. Cash, Wise, Bank)</Text>
+                        <Text style={styles.inputLabel}>{t('wallet.labelPlaceholder')}</Text>
                         <TextInput
                             style={[styles.modalInput, { color: Colors[colorScheme ?? 'light'].text, borderColor: Colors[colorScheme ?? 'light'].tabIconDefault }]}
-                            placeholder="My Wallet"
+                            placeholder={t('wallet.defaultLabel')}
                             placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
                             value={newAssetLabel}
                             onChangeText={setNewAssetLabel}
                         />
 
-                        <Text style={styles.inputLabel}>Currency</Text>
+                        <Text style={styles.inputLabel}>{t('wallet.currency')}</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.currencySelector}>
                             {SUPPORTED_CURRENCIES.map(curr => (
                                 <TouchableOpacity
@@ -256,7 +256,7 @@ export default function WalletScreen() {
                             ))}
                         </ScrollView>
 
-                        <Text style={styles.inputLabel}>Amount</Text>
+                        <Text style={styles.inputLabel}>{t('wallet.amount')}</Text>
                         <TextInput
                             style={[styles.modalInput, { color: Colors[colorScheme ?? 'light'].text, borderColor: Colors[colorScheme ?? 'light'].tabIconDefault }]}
                             keyboardType="numeric"
@@ -268,10 +268,10 @@ export default function WalletScreen() {
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity style={styles.cancelButton} onPress={() => setIsAdding(false)}>
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.saveButton, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]} onPress={handleAddAsset}>
-                                <Text style={styles.saveButtonText}>Save Asset</Text>
+                                <Text style={styles.saveButtonText}>{t('wallet.saveAsset')}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

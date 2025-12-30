@@ -239,6 +239,14 @@ async function scrapeSquareAlger(): Promise<ScrapedRate[]> {
 
         log(`Successfully processed ${scrapedRates.length} rates from Square Alger API`);
 
+        // Log sample rates for debugging
+        if (scrapedRates.length > 0) {
+            const eurRate = scrapedRates.find(r => r.currency === 'EUR');
+            const usdRate = scrapedRates.find(r => r.currency === 'USD');
+            if (eurRate) log(`Square Alger EUR: buy=${eurRate.buy_price}, sell=${eurRate.sell_price}`);
+            if (usdRate) log(`Square Alger USD: buy=${usdRate.buy_price}, sell=${usdRate.sell_price}`);
+        }
+
     } catch (error) {
         errorLog("Error fetching from Square Alger API:", error);
     }
@@ -295,10 +303,16 @@ async function scrapeForexAlgerie(): Promise<ScrapedRate[]> {
                 const sellPrice = parseFloat(item[sellKey]);
 
                 if (!isNaN(buyPrice) && !isNaN(sellPrice)) {
+                    // IMPORTANT: Forex Algérie uses opposite terminology
+                    // Their "buy" means they buy from customer (customer sells)
+                    // Their "sell" means they sell to customer (customer buys)
+                    // So we swap the values to match our convention where:
+                    // buy_price = price customer pays to buy currency (should be higher)
+                    // sell_price = price customer gets when selling currency (should be lower)
                     scrapedRates.push({
                         currency: currencyCode,
-                        buy_price: buyPrice,
-                        sell_price: sellPrice,
+                        buy_price: sellPrice,  // Swapped: use their "sell" as our "buy"
+                        sell_price: buyPrice,  // Swapped: use their "buy" as our "sell"
                         source: 'Forex Algérie'
                     });
                 }
@@ -308,6 +322,14 @@ async function scrapeForexAlgerie(): Promise<ScrapedRate[]> {
         }
 
         log(`Successfully processed ${scrapedRates.length} rates from Forex Algérie API`);
+
+        // Log sample rates for debugging
+        if (scrapedRates.length > 0) {
+            const eurRate = scrapedRates.find(r => r.currency === 'EUR');
+            const usdRate = scrapedRates.find(r => r.currency === 'USD');
+            if (eurRate) log(`Forex Algérie EUR: buy=${eurRate.buy_price}, sell=${eurRate.sell_price}`);
+            if (usdRate) log(`Forex Algérie USD: buy=${usdRate.buy_price}, sell=${usdRate.sell_price}`);
+        }
 
     } catch (error) {
         errorLog("Error fetchin from Forex Algérie API:", error);
@@ -410,41 +432,7 @@ async function scrapeBlackMarketRates(): Promise<RateData[]> {
         return medianRates;
     }
 
-    // Fallback: Use estimated rates based on official rates
-    log("No black market rates scraped, using estimated fallback");
-    const timestamp = new Date().toISOString();
-    const currentDate = new Date().toLocaleDateString('fr-FR');
-    const fallbackRates: RateData[] = [];
-
-    // Get official rates to base our estimates on
-    const officialRates = await scrapeOfficialRates();
-    const officialMap: Record<string, number> = {};
-
-    officialRates.forEach(rate => {
-        if (rate.type === 'OFFICIAL') {
-            officialMap[rate.currency] = rate.buy_price;
-        }
-    });
-
-    // Create estimated black market rates (typically 1.55x official rate)
-    const blackMarketMultiplier = 1.55;
-
-    for (const [currency, officialRate] of Object.entries(officialMap)) {
-        const buyBlack = officialRate * blackMarketMultiplier;
-        const sellBlack = buyBlack * 1.02; // 2% spread
-
-        fallbackRates.push({
-            currency,
-            type: 'BLACK_MARKET',
-            buy_price: parseFloat(buyBlack.toFixed(2)),
-            sell_price: parseFloat(sellBlack.toFixed(2)),
-            source: 'Estimated (Fallback)',
-            date: currentDate,
-            created_at: timestamp,
-        });
-    }
-
-    return fallbackRates;
+    return [];
 }
 
 // Log capturing helper

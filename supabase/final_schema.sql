@@ -131,3 +131,94 @@ create policy "Users can update own subscription"
 
 -- Allow anonymous access for now if needed, or rely on service role for edge functions
 -- Ideally, the edge function uses service_role key to read all tokens.
+-- Market Offers Table
+create table if not exists public.market_offers (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users not null,
+  type text not null check (type in ('OFFER', 'REQUEST')), -- Offer to sell, Request to buy
+  currency_from text not null, -- e.g. 'EUR'
+  currency_to text not null default 'DZD',
+  amount numeric not null,
+  min_amount numeric, -- Optional minimum trade size
+  rate numeric, -- Exchange rate offered
+  payment_methods text[] not null, -- ['Cash', 'Wise', 'BaridiMob', etc.]
+  wilaya text, -- For physical meetups
+  commune text,
+  expires_at timestamp with time zone,
+  status text default 'ACTIVE' check (status in ('ACTIVE', 'COMPLETED', 'EXPIRED', 'DELETED')),
+  contact_info_hidden boolean default true, -- Per user request
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.market_offers enable row level security;
+
+-- Policies
+create policy "Offers are public"
+  on public.market_offers for select
+  using ( status = 'ACTIVE' and (expires_at is null or expires_at > now()) );
+
+create policy "Users can insert own offers"
+  on public.market_offers for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update own offers"
+  on public.market_offers for update
+  using ( auth.uid() = user_id );
+
+create policy "Users can delete own offers"
+  on public.market_offers for delete
+  using ( auth.uid() = user_id );
+-- Market Requests Table (Negotiation)
+create table if not exists public.market_requests (
+  id uuid default gen_random_uuid() primary key,
+  offer_id uuid references public.market_offers(id) not null,
+  requester_id uuid references public.profiles(id) not null,
+  status text not null default 'PENDING' check (status in ('PENDING', 'ACCEPTED', 'REJECTED')),
+  proposed_rate numeric not null,
+  proposed_amount numeric not null,
+  proposed_location text,
+  payment_method text, 
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.market_requests enable row level security;
+
+-- Policies
+
+-- Requester can see their own requests
+create policy "Users can see own requests"
+  on public.market_requests for select
+  using ( auth.uid() = requester_id );
+
+-- Offer Owner can see requests for their offers
+create policy "Owners can see incoming requests"
+  on public.market_requests for select
+  using ( 
+    exists (
+      select 1 from public.market_offers 
+      where id = market_requests.offer_id 
+      and user_id = auth.uid()
+    ) 
+  );
+
+-- Users can insert requests
+create policy "Users can insert requests"
+  on public.market_requests for insert
+  with check ( auth.uid() = requester_id );
+
+-- Offer Owner can update status (Accept/Reject)
+create policy "Owners can update requests"
+  on public.market_requests for update
+  using ( 
+    exists (
+      select 1 from public.market_offers 
+      where id = market_requests.offer_id 
+      and user_id = auth.uid()
+    ) 
+  );
+
+-- [NEW] Market Enhancements
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone text;
+ALTER TABLE public.market_offers ADD COLUMN IF NOT EXISTS phone_number text;
+ALTER TABLE public.market_offers ADD COLUMN IF NOT EXISTS contact_preference text DEFAULT 'email' CHECK (contact_preference IN ('email', 'phone', 'both'));
+ALTER TABLE public.market_offers ADD COLUMN IF NOT EXISTS settled_request_id uuid REFERENCES public.market_requests(id);

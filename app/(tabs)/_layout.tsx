@@ -70,10 +70,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="market"
+        options={{
+          title: "Market",
+          tabBarIcon: ({ color }) => <TabBarIcon name="exchange" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="wallet"
         options={{
           title: t('tabs.wallet'),
           tabBarIcon: ({ color }) => <TabBarIcon name="briefcase" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="market/requests"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

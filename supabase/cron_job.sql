@@ -23,7 +23,12 @@ select cron.schedule(
   select
     net.http_post(
         url:='https://jfhalmsenxfffaakehjq.supabase.co/functions/v1/fetch-rates',
-        headers:='{"Content-Type": "application/json"}'::jsonb
+        headers:='{
+            "Content-Type": "application/json",
+            "apikey": "sb_publishable_YCf0aIeDLXbEei4Yt7Giwg_b3wHeewt",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpmaGFsbXNlbnhmZmZhYWtlaGpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwNTQyNTMsImV4cCI6MjA4MTYzMDI1M30.uj1ct1CRUXS_JNLncYUBuMHCoci-zCC5nRcUDehk56o"
+        }'::jsonb,
+        body:='{}'::jsonb
     ) as request_id;
   $$
 );
