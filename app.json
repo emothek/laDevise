@@ -25,7 +25,7 @@
       "package": "com.ladevise.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 12
+      "versionCode": 13
     },
     "web": {
       "bundler": "metro",
