@@ -34,7 +34,12 @@ export default function RootLayout() {
 
   // Initialize i18n and Aptabase
   useEffect(() => {
-    initI18n().then(() => setI18nReady(true));
+    initI18n()
+      .then(() => setI18nReady(true))
+      .catch((err) => {
+        console.error('Failed to initialize i18n:', err);
+        setI18nReady(true); // Fallback to allow app to continue
+      });
     initAptabase();
   }, []);
 

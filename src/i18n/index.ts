@@ -19,7 +19,7 @@ export const initI18n = async () => {
     let savedLanguage = await AsyncStorage.getItem(LANGUAGE_KEY);
 
     if (!savedLanguage) {
-        savedLanguage = Localization.getLocales()[0].languageCode ?? 'en';
+        savedLanguage = Localization.getLocales()?.[0]?.languageCode ?? 'en';
     }
 
     await i18n

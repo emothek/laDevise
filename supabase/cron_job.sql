@@ -18,7 +18,7 @@ create extension if not exists pg_net;
 
 select cron.schedule(
   'fetch-rates-daily', -- Job name
-  '0 9 * * *',         -- Schedule (9:00 AM daily)
+  '0 9,10 * * *',      -- Schedule (9:00 AM and 10:00 AM daily UTC)
   $$
   select
     net.http_post(

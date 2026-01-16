@@ -25,7 +25,7 @@
       "package": "com.ladevise.app",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "versionCode": 3
+      "versionCode": 12
     },
     "web": {
       "bundler": "metro",
@@ -34,7 +34,32 @@
     },
     "plugins": [
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-notifications",
+      "expo-font",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RateWidget",
+              "label": "La Devise Rates",
+              "minWidth": "250dp",
+              "minHeight": "120dp",
+              "description": "View latest black market rates",
+              "previewImage": "./assets/widget-preview.png"
+            }
+          ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
