@@ -40,18 +40,32 @@ export default function TabLayout() {
             </View>
           ),
           headerRight: () => (
-            <Link href="/login" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="user-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15, gap: 15 }}>
+              <Link href="/alerts" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <FontAwesome
+                      name="bell"
+                      size={22}
+                      color={Colors[colorScheme ?? 'light'].text}
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+              <Link href="/login" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <FontAwesome
+                      name="user-circle"
+                      size={25}
+                      color={Colors[colorScheme ?? 'light'].text}
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+            </View>
           ),
         }}
       />

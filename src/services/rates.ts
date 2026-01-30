@@ -19,13 +19,23 @@ export interface ExchangeRate {
 
 export const fetchRates = async (): Promise<ExchangeRate[]> => {
     try {
-        // Fetch the latest rates
+        // Create a timeout promise that rejects after 10 seconds
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+                reject(new Error('REQUEST_TIMEOUT'));
+            }, 10000);
+        });
+
+        // Race between the fetch and the timeout
         // We order by created_at descending to get the most recent scrape
-        const { data, error } = await supabase
-            .from('rates')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(50); // Fetch enough to cover all currencies (approx 20 official + 20 black market)
+        const { data, error } = await Promise.race([
+            supabase
+                .from('rates')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50), // Fetch enough to cover all currencies (approx 20 official + 20 black market)
+            timeoutPromise
+        ]) as any; // Cast to clean up the race type inference locally
 
         if (error) {
             console.error('Error fetching rates:', error);
@@ -36,16 +46,11 @@ export const fetchRates = async (): Promise<ExchangeRate[]> => {
             return [];
         }
 
-        // The query returns latest first, which is what we want.
-        // However, if we have multiple scrapes, we might just want to ensure we don't mix days?
-        // For now, limiting to 50 is a reasonable heuristic if we scrape daily.
-        // A robust way would be to find the max date, but let's start simple.
-
         return data as ExchangeRate[];
 
     } catch (error) {
         console.error('Unexpected error fetching rates:', error);
-        // Fallback to empty or could return cached/mock if desired
-        return [];
+        // We re-throw so React Query can catch it and show error state
+        throw error;
     }
 };

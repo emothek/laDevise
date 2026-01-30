@@ -1,5 +1,6 @@
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { AuthProvider } from '@/provider/AuthProvider';
+import { useBetaTesting } from '@/src/hooks/useBetaTesting';
 import { initI18n } from '@/src/i18n';
 import { initAptabase } from '@/src/lib/aptabase';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -9,6 +10,8 @@ import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
+
+import { useAlertMonitor } from '@/hooks/useAlertMonitor';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -72,6 +75,8 @@ function RootLayoutNav() {
 
   // Initialize Push Notifications
   usePushNotifications();
+  useBetaTesting();
+  useAlertMonitor();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

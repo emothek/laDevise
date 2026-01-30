@@ -12,8 +12,8 @@ export default {
   dark: {
     text: '#fff',
     background: '#000',
-    tint: tintColorDark,
+    tint: tintColorLight, // Use blue in dark mode too so 'white' text stands out on it
     tabIconDefault: '#ccc',
-    tabIconSelected: tintColorDark,
+    tabIconSelected: tintColorLight,
   },
 };

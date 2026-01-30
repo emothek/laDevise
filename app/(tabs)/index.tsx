@@ -3,14 +3,15 @@ import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
 import { supabase } from '@/lib/supabase';
 import { ExchangeRate, fetchRates } from '@/services/rates';
+import SentimentWidget from '@/src/components/SentimentWidget';
+import { useRateNotification } from '@/src/hooks/useRateNotification';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, RefreshControl, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-
+import { FlatList, Platform, RefreshControl, StyleSheet, Switch, TextInput, TouchableOpacity } from 'react-native';
 const FLAG_MAP: Record<string, string> = {
   EUR: '🇪🇺',
   USD: '🇺🇸',
@@ -104,14 +105,18 @@ const RateCard = ({ item, isFavorite, onToggleFavorite, onPress }: { item: Group
 
 export default function RatesScreen() {
   const { t } = useTranslation();
-  const { data, isLoading, refetch } = useQuery<ExchangeRate[]>({
+  const { data, isLoading, isError, error, refetch } = useQuery<ExchangeRate[]>({
     queryKey: ['rates'],
     queryFn: fetchRates,
+    retry: false
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const { isEnabled: isStickyEnabled, toggleSticky } = useRateNotification();
+
+  // ... (keep useEffect and helper functions same)
 
   useEffect(() => {
     loadFavorites();
@@ -146,7 +151,7 @@ export default function RatesScreen() {
           user_id: user?.id ?? null,
           favorite_currencies: newFavorites,
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'token' });
+        } as any, { onConflict: 'token' });
       }
     } catch (err) {
       console.error("Failed to sync favorites to server", err);
@@ -188,7 +193,6 @@ export default function RatesScreen() {
       const bPriority = PRIORITY_CURRENCIES.indexOf(b.currency);
 
       // If both in priority list
-      if (aPriority !== -1 && bPriority !== -1) return aPriority - aPriority; // Wait, actually standard sort is enough
       if (aPriority !== -1 && bPriority !== -1) return aPriority - bPriority;
 
       if (aPriority !== -1) return -1;
@@ -223,9 +227,36 @@ export default function RatesScreen() {
         />
       </View>
 
+      <View style={{ paddingHorizontal: 0 }}>
+        <SentimentWidget />
+
+        {/* Sticky Notification Toggle (Android Only) */}
+        {Platform.OS === 'android' && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 16, marginBottom: 8 }}>
+            <Ionicons name="notifications-outline" size={16} color={Colors[colorScheme ?? 'light'].text} style={{ marginRight: 8, opacity: 0.6 }} />
+            <Text style={{ fontSize: 12, color: Colors[colorScheme ?? 'light'].text, marginRight: 8, opacity: 0.6 }}>{t('common.stickyRates', "Sticky Rates")}</Text>
+            <Switch
+              value={isStickyEnabled}
+              onValueChange={toggleSticky}
+              trackColor={{ false: '#767577', true: '#2f95dc' }}
+              thumbColor={isStickyEnabled ? '#fff' : '#f4f3f4'}
+              style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] }}
+            />
+          </View>
+        )}
+      </View>
+
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <Text>{t('rates.loading')}</Text>
+        </View>
+      ) : isError ? (
+        <View style={styles.errorContainer}>
+          <Ionicons name="warning-outline" size={48} color={Colors[colorScheme ?? 'light'].text} style={{ opacity: 0.5, marginBottom: 16 }} />
+          <Text style={{ marginBottom: 16, textAlign: 'center' }}>{t('common.errorLoading', "Failed to load data")}</Text>
+          <TouchableOpacity onPress={() => refetch()} style={[styles.retryButton, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]}>
+            <Text style={{ color: 'white', fontWeight: 'bold' }}>{t('common.retry', "Retry")}</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -235,6 +266,14 @@ export default function RatesScreen() {
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={Colors[colorScheme ?? 'light'].text} />
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>{t('rates.noRates', "No rates available")}</Text>
+              <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 12 }}>
+                <Text style={{ color: Colors[colorScheme ?? 'light'].tint }}>{t('common.retry', "Refresh")}</Text>
+              </TouchableOpacity>
+            </View>
           }
         />
       )}
@@ -353,5 +392,25 @@ const styles = StyleSheet.create({
   naText: {
     opacity: 0.3,
     fontStyle: 'italic',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  retryButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 64,
+  },
+  emptyText: {
+    opacity: 0.6,
   }
 });
